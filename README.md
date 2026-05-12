@@ -29,6 +29,28 @@ The simulation displays a **velocity vs. time (v–t) graph** for an object movi
 
 ## Accessibility Features
 
+### 🖱️ Canvas Drag & Touch Interaction
+
+In addition to sliders, students can **directly drag the velocity nodes** on the graph with a mouse, finger, or stylus. This restores the direct-manipulation feel of the original oPhysics simulation while keeping every other accessibility layer intact.
+
+| Device | Gesture |
+|--------|---------|
+| Mouse | Click and drag any node (●) vertically |
+| Touchscreen | Touch and drag any node vertically |
+| Stylus / Apple Pencil | Tap and drag any node vertically |
+
+**Key design details:**
+
+- Each node has a **44 px touch target** radius — meeting WCAG 2.5.5 (minimum 44 × 44 CSS px target size)
+- Dragging snaps to **0.5 m/s increments**, identical to the slider step
+- The corresponding slider **updates in real time** as you drag
+- The Motion Narrative and results table **update live** during drag
+- An active node shows a **subtle highlight ring** while being dragged
+- The cursor changes to `grab` on hover and `grabbing` during drag
+- A hint label beneath the canvas reads: *"✦ Drag the points on the graph, or use the sliders"*
+- Velocity boundaries only — time durations are not draggable (use Δt sliders for that)
+- **Sliders remain the primary, accessible input** — drag is a progressive enhancement
+
 ### 🎛️ Keyboard-Accessible Controls
 
 The original simulation used mouse-drag only. Every control in this rebuild is a native `<input type="range">` slider — fully focusable and operable without a mouse.
