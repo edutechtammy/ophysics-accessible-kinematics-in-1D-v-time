@@ -40,6 +40,26 @@ The original simulation used mouse-drag only. Every control in this rebuild is a
 | `Page Up` / `Page Down` | Adjust value by a larger increment |
 | `Home` / `End` | Jump to minimum or maximum value |
 
+#### Pedagogically Ordered Tab Sequence
+
+Controls are grouped into four semantic `<fieldset>` elements and ordered to match the way the graph is read — **left to right, one segment at a time**:
+
+| Tab Position | Control | Fieldset Group |
+|---|---|---|
+| 1 | v₀ — initial velocity | Starting Condition |
+| 2 | Δt₁ — duration of segment 1 | Segment 1 |
+| 3 | v₁ — velocity at end of segment 1 | Segment 1 |
+| 4 | Δt₂ — duration of segment 2 | Segment 2 |
+| 5 | v₂ — velocity at end of segment 2 | Segment 2 |
+| 6 | Δt₃ — duration of segment 3 | Segment 3 |
+| 7 | v₃ — final velocity | Segment 3 |
+
+This order matters for two reasons:
+
+**Pedagogically:** It mirrors how a student *builds* a scenario in words — *"The object starts at 0 m/s. Segment 1 lasts 3 s and ends at 8 m/s. Segment 2…"* — rather than forcing them to mentally connect velocity controls on one side of the panel to duration controls on the other.
+
+**For keyboard and screen reader users:** Each segment's two defining parameters — *how long it lasts* and *where the velocity ends up* — sit consecutively in the tab order. A keyboard user adjusting Segment 2 does not have to tab past unrelated controls to reach both sliders that define it. A screen reader announces each `<fieldset>` group name before its controls, so the user always knows which segment they are in.
+
 ---
 
 ### 🔊 Screen Reader Support
