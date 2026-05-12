@@ -92,8 +92,9 @@ const resultsBody = document.getElementById('results-body');
 const totalDispEl = document.getElementById('total-disp');
 const totalDistEl = document.getElementById('total-dist');
 const totalTimeEl = document.getElementById('total-time-cell');
-const srAnnounce = document.getElementById('sr-announce');
+const srAnnounce    = document.getElementById('sr-announce');
 const graphTextDesc = document.getElementById('graph-text-desc');
+const narrativeBody = document.getElementById('narrative-body');
 
 /* ═══════════════════════════════════════════════════════════════════════════
    4. Canvas Initialisation
@@ -535,6 +536,130 @@ function updateTable() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
+   8b. Motion Narrative Generator
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * Describes each segment the way a sighted reader would read the graph shape:
+ * slope direction, steepness, sign of velocity, zero crossings.
+ * Returns an HTML string rendered into #narrative-body.
+ */
+function generateMotionNarrative() {
+    const times     = getTimes();
+    const totalTime = times[SEG_COUNT];
+    const segments  = [];
+
+    for (let i = 0; i < SEG_COUNT; i++) {
+        const v0 = state.velocities[i];
+        const v1 = state.velocities[i + 1];
+        const dt = state.durations[i];
+        const t0 = times[i];
+        const t1 = times[i + 1];
+        const a  = getAcceleration(i);
+        const d  = getDisplacement(i);
+        const zeroCross = (v0 * v1 < 0);
+
+        // ── Slope shape description ──────────────────────────────────────
+        let slopeIcon, slopeClass, shapeDesc;
+        if (zeroCross) {
+            slopeIcon  = '⚠';
+            slopeClass = 'cross';
+            const frac   = Math.abs(v0) / Math.abs(v1 - v0);
+            const tCross = fmt(t0 + frac * dt);
+            if (v0 > 0) {
+                shapeDesc = `The graph line <strong>slopes downward</strong> from ${fmt(v0)} m/s, 
+                    crosses the zero line at t = ${tCross} s, and continues below zero to ${fmt(v1)} m/s.
+                    The object is <strong>slowing down, momentarily stops, then reverses direction</strong> 
+                    (starts moving in the negative/backward direction).`;
+            } else {
+                shapeDesc = `The graph line <strong>slopes upward</strong> from ${fmt(v0)} m/s, 
+                    crosses the zero line at t = ${tCross} s, and continues above zero to ${fmt(v1)} m/s.
+                    The object is <strong>slowing down (while moving backward), momentarily stops, 
+                    then reverses direction</strong> (starts moving in the positive/forward direction).`;
+            }
+        } else if (Math.abs(a) < 0.001) {
+            slopeIcon  = '→';
+            slopeClass = 'flat';
+            const dir  = v0 > 0 ? 'positive (forward)' : v0 < 0 ? 'negative (backward)' : 'zero';
+            shapeDesc  = `The graph line is <strong>perfectly horizontal</strong> at ${fmt(v0)} m/s — 
+                a flat line means <strong>no acceleration and constant velocity</strong>. 
+                The object moves at a steady pace in the ${dir} direction.`;
+        } else if (a > 0) {
+            slopeIcon  = '↗';
+            slopeClass = 'up';
+            const steepness = Math.abs(a) > 5 ? 'steeply' : Math.abs(a) > 1.5 ? 'moderately' : 'gently';
+            if (v0 >= 0) {
+                shapeDesc = `The graph line <strong>slopes upward ${steepness}</strong> from ${fmt(v0)} to ${fmt(v1)} m/s — 
+                    a rising line means <strong>positive acceleration</strong>. 
+                    The object is <strong>speeding up</strong> in the positive (forward) direction.`;
+            } else {
+                shapeDesc = `The graph line <strong>slopes upward ${steepness}</strong> from ${fmt(v0)} to ${fmt(v1)} m/s — 
+                    a rising line means <strong>positive acceleration</strong>. 
+                    The object is moving in the negative direction but <strong>slowing down</strong> 
+                    (magnitude of velocity is decreasing).`;
+            }
+        } else {
+            slopeIcon  = '↘';
+            slopeClass = 'down';
+            const steepness = Math.abs(a) > 5 ? 'steeply' : Math.abs(a) > 1.5 ? 'moderately' : 'gently';
+            if (v0 <= 0) {
+                shapeDesc = `The graph line <strong>slopes downward ${steepness}</strong> from ${fmt(v0)} to ${fmt(v1)} m/s — 
+                    a falling line means <strong>negative acceleration</strong>. 
+                    The object is <strong>speeding up</strong> in the negative (backward) direction.`;
+            } else {
+                shapeDesc = `The graph line <strong>slopes downward ${steepness}</strong> from ${fmt(v0)} to ${fmt(v1)} m/s — 
+                    a falling line means <strong>negative acceleration</strong>. 
+                    The object is <strong>slowing down</strong> in the positive (forward) direction.`;
+            }
+        }
+
+        // ── Displacement plain-language ──────────────────────────────────
+        const dispDir  = d > 0.001 ? 'forward (positive direction)'
+                       : d < -0.001 ? 'backward (negative direction)'
+                       : 'no net displacement (returned to same position)';
+        const dispDesc = `Net displacement: <strong>${fmt(d)} m</strong> ${dispDir}.`;
+
+        segments.push({ i, t0, t1, slopeIcon, slopeClass, shapeDesc, dispDesc });
+    }
+
+    // ── Overall summary sentence ─────────────────────────────────────────
+    const crossings    = segments.filter(s => s.slopeClass === 'cross').length;
+    const flatSegs     = segments.filter(s => s.slopeClass === 'flat').length;
+    const totalDisp    = getTotalDisplacement();
+    const totalDist    = getTotalDistance();
+    const netDir       = totalDisp > 0.001 ? 'forward' : totalDisp < -0.001 ? 'backward' : 'back to its start';
+
+    let summary = `Over ${fmt(times[SEG_COUNT])} seconds, the object travels a total distance of 
+        <strong>${fmt(totalDist)} m</strong> and ends up 
+        <strong>${fmt(Math.abs(totalDisp))} m ${netDir}</strong> from where it started.`;
+    if (crossings > 0) {
+        summary += ` It <strong>changes direction ${crossings} time${crossings > 1 ? 's' : ''}</strong> during the motion.`;
+    }
+    if (flatSegs === SEG_COUNT) {
+        summary += ' The entire graph is a flat horizontal line — the object moves at constant velocity throughout.';
+    }
+
+    // ── Build HTML ────────────────────────────────────────────────────────
+    let html = `<p class="narrative-summary" role="note">${summary}</p>`;
+    html += '<ul class="narrative-segments">';
+
+    for (const seg of segments) {
+        html += `
+          <li class="narrative-seg">
+            <div class="narrative-seg-title">
+              <span class="slope-icon slope-icon--${seg.slopeClass}" aria-hidden="true">${seg.slopeIcon}</span>
+              Segment ${seg.i + 1} &nbsp;<span style="font-weight:400;color:var(--clr-text-muted);">t = ${fmt(seg.t0)} – ${fmt(seg.t1)} s</span>
+            </div>
+            <p class="narrative-seg-desc">${seg.shapeDesc}</p>
+            <p class="narrative-seg-desc" style="margin-top:var(--sp-xs);">${seg.dispDesc}</p>
+          </li>`;
+    }
+
+    html += '</ul>';
+    return html;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
    9. Screen-Reader Descriptions & Announcements
    ═══════════════════════════════════════════════════════════════════════════ */
 
@@ -626,6 +751,9 @@ function updateAll(changedId) {
     // Update the canvas accessible description paragraph
     const desc = generateFullDescription();
     graphTextDesc.textContent = desc;
+
+    // Update the visible + SR-readable motion narrative
+    narrativeBody.innerHTML = generateMotionNarrative();
 
     // Short polite announcement for the change
     if (changedId) {
