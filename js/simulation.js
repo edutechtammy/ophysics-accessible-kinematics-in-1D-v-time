@@ -829,21 +829,21 @@ function setupSliders() {
    ═══════════════════════════════════════════════════════════════════════════ */
 
 const PRESETS = {
-    default:    { velocities: [0,   8,    8,   -4],  durations: [3, 2, 3] },
-    constant:   { velocities: [6,   6,    6,    6],  durations: [3, 3, 3] },
-    accelerate: { velocities: [-12, -4,   4,   12],  durations: [3, 3, 3] },
-    stop:       { velocities: [8,   8,    0,   -6],  durations: [2, 2, 4] },
+    default: { velocities: [0, 8, 8, -4], durations: [3, 2, 3] },
+    constant: { velocities: [6, 6, 6, 6], durations: [3, 3, 3] },
+    accelerate: { velocities: [-12, -4, 4, 12], durations: [3, 3, 3] },
+    stop: { velocities: [8, 8, 0, -6], durations: [2, 2, 4] },
     // Thrown upward at 10 m/s; a = −10 m/s² (≈ g) throughout all three segments.
     // Reaches peak (v = 0) at t = 1 s, zero-crossing visible, falls to −20 m/s by t = 3 s.
-    freefall:   { velocities: [10,  0,  -10,  -20],  durations: [1, 1, 1] },
+    freefall: { velocities: [10, 0, -10, -20], durations: [1, 1, 1] },
 };
 
 const PRESET_NAMES = {
-    default:    'Default scenario',
-    constant:   'Constant velocity',
+    default: 'Default scenario',
+    constant: 'Constant velocity',
     accelerate: 'Uniform acceleration',
-    stop:       'Stop and return',
-    freefall:   'Free fall (thrown upward)',
+    stop: 'Stop and return',
+    freefall: 'Free fall (thrown upward)',
 };
 
 function applyPreset(name) {
