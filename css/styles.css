@@ -302,60 +302,62 @@ kbd {
 }
 
 .control-fieldset {
-  border: 1px solid var(--clr-border);
-  border-radius: var(--radius);
-  padding: var(--sp-md);
-  margin: 0 0 var(--sp-md);
+    border: 1px solid var(--clr-border);
+    border-radius: var(--radius);
+    padding: var(--sp-md);
+    margin: 0 0 var(--sp-md);
 }
 
 .control-fieldset:last-child {
-  margin-bottom: 0;
+    margin-bottom: 0;
 }
 
 /* Starting condition — purple accent */
 .control-fieldset--start {
-  border-left: 4px solid #7c3aed;
+    border-left: 4px solid #7c3aed;
 }
 
 .control-fieldset--start legend {
-  color: #5b21b6;
+    color: #5b21b6;
 }
 
 /* Segment fieldsets — teal accent */
 .control-fieldset--seg {
-  border-left: 4px solid #0891b2;
+    border-left: 4px solid #0891b2;
 }
 
 .control-fieldset--seg legend {
-  color: #0e7490;
+    color: #0e7490;
 }
 
 .control-fieldset legend {
-  font-weight: 700;
-  font-size: 0.85rem;
-  color: var(--clr-text-muted);
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-  padding: 0 var(--sp-xs);
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--clr-text-muted);
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    padding: 0 var(--sp-xs);
 }
 
 @media (prefers-color-scheme: dark) {
-  .control-fieldset--start {
-    border-left-color: #a78bfa;
-  }
+    .control-fieldset--start {
+        border-left-color: #a78bfa;
+    }
 
-  .control-fieldset--start legend {
-    color: #c4b5fd;
-  }
+    .control-fieldset--start legend {
+        color: #c4b5fd;
+    }
 
-  .control-fieldset--seg {
-    border-left-color: #22d3ee;
-  }
+    .control-fieldset--seg {
+        border-left-color: #22d3ee;
+    }
 
-  .control-fieldset--seg legend {
-    color: #67e8f9;
-  }
-}.control-item {
+    .control-fieldset--seg legend {
+        color: #67e8f9;
+    }
+}
+
+.control-item {
     margin-bottom: var(--sp-md);
 }
 

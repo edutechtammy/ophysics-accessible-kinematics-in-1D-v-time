@@ -767,13 +767,13 @@ function updateAll(changedId) {
 
 // Order matches DOM tab order: start → [seg1: duration, end-velocity] → [seg2: …] → [seg3: …]
 const SLIDER_CONFIG = [
-    { id: 'v0',  type: 'velocity', index: 0 },   // Starting condition
+    { id: 'v0', type: 'velocity', index: 0 },   // Starting condition
     { id: 'dt1', type: 'duration', index: 0 },   // Segment 1 — how long
-    { id: 'v1',  type: 'velocity', index: 1 },   // Segment 1 — end velocity
+    { id: 'v1', type: 'velocity', index: 1 },   // Segment 1 — end velocity
     { id: 'dt2', type: 'duration', index: 1 },   // Segment 2 — how long
-    { id: 'v2',  type: 'velocity', index: 2 },   // Segment 2 — end velocity
+    { id: 'v2', type: 'velocity', index: 2 },   // Segment 2 — end velocity
     { id: 'dt3', type: 'duration', index: 2 },   // Segment 3 — how long
-    { id: 'v3',  type: 'velocity', index: 3 },   // Segment 3 — final velocity
+    { id: 'v3', type: 'velocity', index: 3 },   // Segment 3 — final velocity
 ];
 
 function syncOutputFromState(cfg) {
