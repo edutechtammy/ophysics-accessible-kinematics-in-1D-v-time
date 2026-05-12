@@ -491,6 +491,17 @@ input[type="range"]:focus-visible {
     -webkit-overflow-scrolling: touch;
 }
 
+/* Drag-hint text shown beneath the graph */
+.canvas-wrapper::after {
+    content: '✦ Drag the points on the graph, or use the sliders';
+    display: block;
+    text-align: center;
+    font-size: 0.78rem;
+    color: var(--clr-text-muted);
+    margin-top: 0.35rem;
+    pointer-events: none;
+}
+
 #vtGraph {
     display: block;
     max-width: 100%;
@@ -498,6 +509,12 @@ input[type="range"]:focus-visible {
     border: 1px solid var(--clr-border);
     border-radius: var(--radius);
     background: #fff;
+    cursor: default;
+    touch-action: none;   /* prevent scroll interfering with drag */
+}
+
+#vtGraph.dragging {
+    cursor: grabbing !important;
 }
 
 /* ── Results Table ───────────────────────────────────────────────────────── */

@@ -82,6 +82,12 @@ const state = {
     durations: [3, 2, 3],        // Δt₁ … Δt₃ (s)
 };
 
+// Drag state — which control point (0-3) is being dragged, if any
+const drag = {
+    active: false,
+    pointIndex: null,   // 0-3 = velocity node
+};
+
 /* ═══════════════════════════════════════════════════════════════════════════
    3. DOM References
    ═══════════════════════════════════════════════════════════════════════════ */
@@ -134,6 +140,55 @@ function toX(t, totalTime, p) {
 
 function toY(v, p) {
     return p.y + ((V_AXIS_MAX - v) / (V_AXIS_MAX - V_AXIS_MIN)) * p.h;
+}
+
+/** Convert a canvas Y pixel back to a velocity value, clamped to slider range */
+function fromY(canvasY, p) {
+    const v = V_AXIS_MAX - ((canvasY - p.y) / p.h) * (V_AXIS_MAX - V_AXIS_MIN);
+    // Snap to 0.5 step (same as slider)
+    const snapped = Math.round(v * 2) / 2;
+    return Math.max(-20, Math.min(20, snapped));
+}
+
+/**
+ * Get canvas-relative coordinates from a mouse or touch event,
+ * accounting for devicePixelRatio scaling and element offset.
+ */
+function getCanvasPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = CANVAS_W / rect.width;
+    const scaleY = CANVAS_H / rect.height;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return {
+        x: (clientX - rect.left) * scaleX,
+        y: (clientY - rect.top)  * scaleY,
+    };
+}
+
+/**
+ * Return the index (0-3) of the velocity node closest to (px, py)
+ * within the 44px touch-target radius, or null if none.
+ */
+function hitTestPoint(px, py) {
+    const times     = getTimes();
+    const totalTime = times[SEG_COUNT];
+    const p         = plotBounds();
+    const HIT_R     = 44;   // px — WCAG 2.5.5 minimum touch target
+
+    let closest   = null;
+    let closestD2 = HIT_R * HIT_R;
+
+    for (let i = 0; i <= SEG_COUNT; i++) {
+        const cx = toX(times[i], totalTime, p);
+        const cy = toY(state.velocities[i], p);
+        const d2 = (px - cx) ** 2 + (py - cy) ** 2;
+        if (d2 < closestD2) {
+            closestD2 = d2;
+            closest   = i;
+        }
+    }
+    return closest;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -417,6 +472,14 @@ function drawControlPoints(p, times, totalTime, C) {
     for (let i = 0; i <= SEG_COUNT; i++) {
         const x = toX(times[i], totalTime, p);
         const y = toY(state.velocities[i], p);
+
+        // Larger highlight ring when this point is being dragged
+        if (drag.active && drag.pointIndex === i) {
+            ctx.beginPath();
+            ctx.arc(x, y, 13, 0, Math.PI * 2);
+            ctx.fillStyle = C.pointStroke.replace(')', ',0.2)').replace('rgb', 'rgba');
+            ctx.fill();
+        }
 
         // Circle
         ctx.beginPath();
@@ -874,6 +937,77 @@ function setupPresets() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
+   12. Canvas Drag Interaction (mouse + touch)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+function applyDragAt(canvasY) {
+    const p   = plotBounds();
+    const v   = fromY(canvasY, p);
+    const idx = drag.pointIndex;
+
+    if (v === state.velocities[idx]) return;   // no change, skip re-render
+    state.velocities[idx] = v;
+
+    // Sync the corresponding slider + output
+    const cfg = SLIDER_CONFIG.find(c => c.type === 'velocity' && c.index === idx);
+    if (cfg) syncOutputFromState(cfg);
+
+    updateAll(`v${idx}`);
+}
+
+function onPointerDown(e) {
+    // Ignore right-click
+    if (e.button !== undefined && e.button !== 0) return;
+
+    const pos   = getCanvasPos(e);
+    const hit   = hitTestPoint(pos.x, pos.y);
+    if (hit === null) return;
+
+    drag.active     = true;
+    drag.pointIndex = hit;
+    canvas.classList.add('dragging');
+
+    // Prevent page scroll on touch while dragging
+    e.preventDefault();
+}
+
+function onPointerMove(e) {
+    if (!drag.active) {
+        // Update cursor: pointer when hovering a hit target, default otherwise
+        const pos = getCanvasPos(e);
+        const hit = hitTestPoint(pos.x, pos.y);
+        canvas.style.cursor = hit !== null ? 'grab' : 'default';
+        return;
+    }
+    e.preventDefault();
+    const pos = getCanvasPos(e);
+    applyDragAt(pos.y);
+}
+
+function onPointerUp() {
+    if (!drag.active) return;
+    drag.active     = false;
+    drag.pointIndex = null;
+    canvas.classList.remove('dragging');
+    canvas.style.cursor = 'default';
+    // Final full announce after drag ends
+    scheduleAnnouncement(generateShortAnnouncement(null));
+}
+
+function setupCanvasDrag() {
+    // ── Mouse events ────────────────────────────────────────────────────────
+    canvas.addEventListener('mousedown',  onPointerDown);
+    window.addEventListener('mousemove',  onPointerMove);
+    window.addEventListener('mouseup',    onPointerUp);
+
+    // ── Touch events ────────────────────────────────────────────────────────
+    canvas.addEventListener('touchstart', onPointerDown, { passive: false });
+    window.addEventListener('touchmove',  onPointerMove, { passive: false });
+    window.addEventListener('touchend',   onPointerUp);
+    window.addEventListener('touchcancel',onPointerUp);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
    Utility: number formatting
    ═══════════════════════════════════════════════════════════════════════════ */
 
@@ -894,6 +1028,7 @@ function init() {
     initCanvas();
     setupSliders();
     setupPresets();
+    setupCanvasDrag();
     updateAll(null);
 }
 
