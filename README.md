@@ -172,6 +172,7 @@ Four preset scenarios are available as keyboard-accessible buttons:
 | **Constant Velocity** | All segments at 6 m/s — flat horizontal line |
 | **Uniform Acceleration** | Steady increase from −12 to 12 m/s |
 | **Stop and Return** | Object slows, stops, reverses direction |
+| **Free Fall** | Object thrown upward at 10 m/s; constant a = −10 m/s² (≈ g) throughout. Reaches peak (v = 0) at t = 1 s, zero-crossing visible, falls to −20 m/s by t = 3 s |
 
 ---
 
