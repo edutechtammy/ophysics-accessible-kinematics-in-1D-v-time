@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kinematics in 1D: Velocity vs. Time Graphs</title>
+  <meta name="description" content="An accessible interactive simulation of velocity vs. time graphs for one-dimensional kinematics. Adjust velocities and time durations using keyboard-accessible sliders. WCAG 2.1 AA / Section 508 compliant.">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ═══ SKIP LINK ═══════════════════════════════════════════════════ -->
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <!-- ═══ HEADER ══════════════════════════════════════════════════════ -->
+  <header class="site-header" role="banner">
+    <div class="header-inner">
+      <h1>Kinematics in 1D</h1>
+      <p class="subtitle">Velocity vs. Time Graphs — Accessible Interactive Simulation</p>
+    </div>
+  </header>
+
+  <!-- ═══ MAIN ═════════════════════════════════════════════════════════ -->
+  <main id="main">
+
+    <!-- Instructions -->
+    <section class="instructions" aria-labelledby="how-to-heading">
+      <h2 id="how-to-heading">How to Use This Simulation</h2>
+      <p>
+        This simulation displays a <strong>velocity vs. time (v–t) graph</strong> for an object
+        moving along a straight line. The graph has three segments defined by four velocity
+        values and three segment durations.
+      </p>
+      <ul>
+        <li>
+          <strong>Velocity sliders (v₀ – v₃)</strong> set the velocity at each transition
+          point, from −20 to 20 m/s.
+        </li>
+        <li>
+          <strong>Duration sliders (Δt₁ – Δt₃)</strong> set the length of each time segment,
+          from 0.5 to 10 s.
+        </li>
+        <li>
+          When a slider is focused, use <kbd>←</kbd> <kbd>→</kbd> arrow keys to adjust by
+          one step, or <kbd>Page Up</kbd> / <kbd>Page Down</kbd> for larger increments.
+        </li>
+        <li>
+          The <a href="#results-heading">Calculated Values table</a> below the graph shows
+          acceleration and displacement for each segment, plus totals.
+        </li>
+      </ul>
+      <p>
+        <span class="legend-swatch legend-pos" aria-hidden="true"></span>
+        <strong>Blue shading</strong> = positive displacement (motion in + direction).
+        <span class="legend-swatch legend-neg" aria-hidden="true"></span>
+        <strong>Orange shading</strong> = negative displacement (motion in − direction).
+      </p>
+    </section>
+
+    <!-- Presets -->
+    <div class="presets-bar" role="group" aria-labelledby="presets-label-id">
+      <span id="presets-label-id" class="presets-label">Presets:</span>
+      <button class="preset-btn" data-preset="default"    type="button">Default</button>
+      <button class="preset-btn" data-preset="constant"   type="button">Constant Velocity</button>
+      <button class="preset-btn" data-preset="accelerate" type="button">Uniform Acceleration</button>
+      <button class="preset-btn" data-preset="stop"       type="button">Stop and Return</button>
+      <button class="preset-btn preset-btn--reset" data-preset="reset" type="button" id="reset-btn">
+        Reset
+      </button>
+    </div>
+
+    <!-- ── Simulation layout: Controls + Graph ───────────────────────── -->
+    <div class="sim-layout">
+
+      <!-- Left panel: Controls -->
+      <section class="controls-panel" aria-labelledby="controls-heading">
+        <h2 id="controls-heading">Graph Controls</h2>
+
+        <!-- Velocity fieldset -->
+        <fieldset class="control-fieldset">
+          <legend>Velocity Values</legend>
+
+          <!-- v₀ -->
+          <div class="control-item">
+            <label for="v0">
+              v₀
+              <span class="ctrl-sub">velocity at t = 0</span>
+            </label>
+            <div class="slider-row">
+              <span class="range-limit" aria-hidden="true">−20</span>
+              <input type="range" id="v0" name="v0"
+                     min="-20" max="20" step="0.5" value="0"
+                     aria-valuetext="0 meters per second"
+                     aria-describedby="v0-desc">
+              <span class="range-limit" aria-hidden="true">20</span>
+            </div>
+            <div class="value-row">
+              <output for="v0" id="v0-out" class="value-out">0 m/s</output>
+            </div>
+            <span id="v0-desc" class="sr-only">
+              Velocity at the very start of the motion, in meters per second.
+            </span>
+          </div>
+
+          <!-- v₁ -->
+          <div class="control-item">
+            <label for="v1">
+              v₁
+              <span class="ctrl-sub">velocity at end of segment 1</span>
+            </label>
+            <div class="slider-row">
+              <span class="range-limit" aria-hidden="true">−20</span>
+              <input type="range" id="v1" name="v1"
+                     min="-20" max="20" step="0.5" value="8"
+                     aria-valuetext="8 meters per second"
+                     aria-describedby="v1-desc">
+              <span class="range-limit" aria-hidden="true">20</span>
+            </div>
+            <div class="value-row">
+              <output for="v1" id="v1-out" class="value-out">8 m/s</output>
+            </div>
+            <span id="v1-desc" class="sr-only">
+              Velocity at the boundary between segments 1 and 2, in meters per second.
+            </span>
+          </div>
+
+          <!-- v₂ -->
+          <div class="control-item">
+            <label for="v2">
+              v₂
+              <span class="ctrl-sub">velocity at end of segment 2</span>
+            </label>
+            <div class="slider-row">
+              <span class="range-limit" aria-hidden="true">−20</span>
+              <input type="range" id="v2" name="v2"
+                     min="-20" max="20" step="0.5" value="8"
+                     aria-valuetext="8 meters per second"
+                     aria-describedby="v2-desc">
+              <span class="range-limit" aria-hidden="true">20</span>
+            </div>
+            <div class="value-row">
+              <output for="v2" id="v2-out" class="value-out">8 m/s</output>
+            </div>
+            <span id="v2-desc" class="sr-only">
+              Velocity at the boundary between segments 2 and 3, in meters per second.
+            </span>
+          </div>
+
+          <!-- v₃ -->
+          <div class="control-item">
+            <label for="v3">
+              v₃
+              <span class="ctrl-sub">velocity at end of segment 3</span>
+            </label>
+            <div class="slider-row">
+              <span class="range-limit" aria-hidden="true">−20</span>
+              <input type="range" id="v3" name="v3"
+                     min="-20" max="20" step="0.5" value="-4"
+                     aria-valuetext="negative 4 meters per second"
+                     aria-describedby="v3-desc">
+              <span class="range-limit" aria-hidden="true">20</span>
+            </div>
+            <div class="value-row">
+              <output for="v3" id="v3-out" class="value-out">−4 m/s</output>
+            </div>
+            <span id="v3-desc" class="sr-only">
+              Velocity at the very end of the motion, in meters per second.
+            </span>
+          </div>
+
+        </fieldset><!-- /velocity fieldset -->
+
+        <!-- Duration fieldset -->
+        <fieldset class="control-fieldset">
+          <legend>Segment Durations</legend>
+
+          <!-- Δt₁ -->
+          <div class="control-item">
+            <label for="dt1">
+              Δt₁
+              <span class="ctrl-sub">duration of segment 1</span>
+            </label>
+            <div class="slider-row">
+              <span class="range-limit" aria-hidden="true">0.5</span>
+              <input type="range" id="dt1" name="dt1"
+                     min="0.5" max="10" step="0.5" value="3"
+                     aria-valuetext="3 seconds"
+                     aria-describedby="dt1-desc">
+              <span class="range-limit" aria-hidden="true">10</span>
+            </div>
+            <div class="value-row">
+              <output for="dt1" id="dt1-out" class="value-out">3 s</output>
+            </div>
+            <span id="dt1-desc" class="sr-only">
+              How long segment 1 lasts, in seconds.
+            </span>
+          </div>
+
+          <!-- Δt₂ -->
+          <div class="control-item">
+            <label for="dt2">
+              Δt₂
+              <span class="ctrl-sub">duration of segment 2</span>
+            </label>
+            <div class="slider-row">
+              <span class="range-limit" aria-hidden="true">0.5</span>
+              <input type="range" id="dt2" name="dt2"
+                     min="0.5" max="10" step="0.5" value="2"
+                     aria-valuetext="2 seconds"
+                     aria-describedby="dt2-desc">
+              <span class="range-limit" aria-hidden="true">10</span>
+            </div>
+            <div class="value-row">
+              <output for="dt2" id="dt2-out" class="value-out">2 s</output>
+            </div>
+            <span id="dt2-desc" class="sr-only">
+              How long segment 2 lasts, in seconds.
+            </span>
+          </div>
+
+          <!-- Δt₃ -->
+          <div class="control-item">
+            <label for="dt3">
+              Δt₃
+              <span class="ctrl-sub">duration of segment 3</span>
+            </label>
+            <div class="slider-row">
+              <span class="range-limit" aria-hidden="true">0.5</span>
+              <input type="range" id="dt3" name="dt3"
+                     min="0.5" max="10" step="0.5" value="3"
+                     aria-valuetext="3 seconds"
+                     aria-describedby="dt3-desc">
+              <span class="range-limit" aria-hidden="true">10</span>
+            </div>
+            <div class="value-row">
+              <output for="dt3" id="dt3-out" class="value-out">3 s</output>
+            </div>
+            <span id="dt3-desc" class="sr-only">
+              How long segment 3 lasts, in seconds.
+            </span>
+          </div>
+
+        </fieldset><!-- /duration fieldset -->
+
+      </section><!-- /controls-panel -->
+
+      <!-- Right panel: Graph -->
+      <section class="graph-panel" aria-labelledby="graph-heading">
+        <h2 id="graph-heading">Velocity vs. Time Graph</h2>
+        <div class="canvas-wrapper">
+          <canvas
+            id="vtGraph"
+            width="620"
+            height="380"
+            role="img"
+            aria-labelledby="graph-heading"
+            aria-describedby="graph-text-desc">
+          </canvas>
+        </div>
+        <!--
+          This paragraph is visually hidden but always available to screen readers.
+          It is updated by JS on every graph change and also acts as a live region.
+        -->
+        <p id="graph-text-desc"
+           class="sr-only"
+           aria-live="polite"
+           aria-atomic="true">
+          Graph loading…
+        </p>
+      </section>
+
+    </div><!-- /.sim-layout -->
+
+    <!-- ── Results Table ──────────────────────────────────────────────── -->
+    <section class="results-section" aria-labelledby="results-heading">
+      <h2 id="results-heading">Calculated Values</h2>
+
+      <!--
+        Polite live region: announces short change summaries to screen readers.
+        Kept separate from the table so updates don't re-read the entire table.
+      -->
+      <div id="sr-announce"
+           class="sr-only"
+           aria-live="polite"
+           aria-atomic="true"
+           role="status">
+      </div>
+
+      <div class="table-wrapper">
+        <table id="results-table">
+          <caption>
+            Physics quantities for each segment of the velocity vs. time graph.
+            Values update automatically when any control is adjusted.
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Segment</th>
+              <th scope="col">Time Interval (s)</th>
+              <th scope="col">Start Velocity (m/s)</th>
+              <th scope="col">End Velocity (m/s)</th>
+              <th scope="col">Acceleration (m/s²)</th>
+              <th scope="col">Displacement (m)</th>
+            </tr>
+          </thead>
+          <tbody id="results-body">
+            <!-- Populated dynamically by simulation.js -->
+          </tbody>
+          <tfoot>
+            <tr class="totals-row">
+              <th scope="row" colspan="5">Total Displacement</th>
+              <td id="total-disp">—</td>
+            </tr>
+            <tr class="totals-row">
+              <th scope="row" colspan="5">Total Distance Traveled</th>
+              <td id="total-dist">—</td>
+            </tr>
+            <tr class="totals-row">
+              <th scope="row" colspan="5">Total Time</th>
+              <td id="total-time-cell">—</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div><!-- /.table-wrapper -->
+
+    </section><!-- /results-section -->
+
+  </main><!-- /#main -->
+
+  <!-- ═══ FOOTER ══════════════════════════════════════════════════════ -->
+  <footer class="site-footer" role="contentinfo">
+    <p>
+      Accessible rebuild of
+      <a href="https://ophysics.com/k5a.html"
+         target="_blank"
+         rel="noopener noreferrer">
+        oPhysics k5a
+        <span class="sr-only">(opens in new tab)</span>
+      </a>
+      &nbsp;·&nbsp; WCAG 2.1 Level AA &nbsp;·&nbsp; Section 508 Compliant
+    </p>
+  </footer>
+
+  <script src="js/simulation.js"></script>
+</body>
+</html>
