@@ -164,6 +164,28 @@ main {
     margin-bottom: var(--sp-xs);
 }
 
+/* Links inside instructions: explicit dark colour + underline for WCAG AA contrast
+   #1240a6 on #f8fafc = 8.1:1 (passes AA & AAA) */
+.instructions a {
+  color: #1240a6;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.instructions a:hover {
+  color: #0d2f7a;
+}
+
+@media (prefers-color-scheme: dark) {
+  .instructions a {
+    color: #93c5fd;   /* light blue — #93c5fd on #1e293b = 7.2:1 */
+  }
+
+  .instructions a:hover {
+    color: #bfdbfe;
+  }
+}
+
 kbd {
     display: inline-block;
     padding: 1px 7px;
