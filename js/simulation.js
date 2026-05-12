@@ -92,7 +92,7 @@ const resultsBody = document.getElementById('results-body');
 const totalDispEl = document.getElementById('total-disp');
 const totalDistEl = document.getElementById('total-dist');
 const totalTimeEl = document.getElementById('total-time-cell');
-const srAnnounce    = document.getElementById('sr-announce');
+const srAnnounce = document.getElementById('sr-announce');
 const graphTextDesc = document.getElementById('graph-text-desc');
 const narrativeBody = document.getElementById('narrative-body');
 
@@ -545,9 +545,9 @@ function updateTable() {
  * Returns an HTML string rendered into #narrative-body.
  */
 function generateMotionNarrative() {
-    const times     = getTimes();
+    const times = getTimes();
     const totalTime = times[SEG_COUNT];
-    const segments  = [];
+    const segments = [];
 
     for (let i = 0; i < SEG_COUNT; i++) {
         const v0 = state.velocities[i];
@@ -555,16 +555,16 @@ function generateMotionNarrative() {
         const dt = state.durations[i];
         const t0 = times[i];
         const t1 = times[i + 1];
-        const a  = getAcceleration(i);
-        const d  = getDisplacement(i);
+        const a = getAcceleration(i);
+        const d = getDisplacement(i);
         const zeroCross = (v0 * v1 < 0);
 
         // ── Slope shape description ──────────────────────────────────────
         let slopeIcon, slopeClass, shapeDesc;
         if (zeroCross) {
-            slopeIcon  = '⚠';
+            slopeIcon = '⚠';
             slopeClass = 'cross';
-            const frac   = Math.abs(v0) / Math.abs(v1 - v0);
+            const frac = Math.abs(v0) / Math.abs(v1 - v0);
             const tCross = fmt(t0 + frac * dt);
             if (v0 > 0) {
                 shapeDesc = `The graph line <strong>slopes downward</strong> from ${fmt(v0)} m/s, 
@@ -578,14 +578,14 @@ function generateMotionNarrative() {
                     then reverses direction</strong> (starts moving in the positive/forward direction).`;
             }
         } else if (Math.abs(a) < 0.001) {
-            slopeIcon  = '→';
+            slopeIcon = '→';
             slopeClass = 'flat';
-            const dir  = v0 > 0 ? 'positive (forward)' : v0 < 0 ? 'negative (backward)' : 'zero';
-            shapeDesc  = `The graph line is <strong>perfectly horizontal</strong> at ${fmt(v0)} m/s — 
+            const dir = v0 > 0 ? 'positive (forward)' : v0 < 0 ? 'negative (backward)' : 'zero';
+            shapeDesc = `The graph line is <strong>perfectly horizontal</strong> at ${fmt(v0)} m/s — 
                 a flat line means <strong>no acceleration and constant velocity</strong>. 
                 The object moves at a steady pace in the ${dir} direction.`;
         } else if (a > 0) {
-            slopeIcon  = '↗';
+            slopeIcon = '↗';
             slopeClass = 'up';
             const steepness = Math.abs(a) > 5 ? 'steeply' : Math.abs(a) > 1.5 ? 'moderately' : 'gently';
             if (v0 >= 0) {
@@ -599,7 +599,7 @@ function generateMotionNarrative() {
                     (magnitude of velocity is decreasing).`;
             }
         } else {
-            slopeIcon  = '↘';
+            slopeIcon = '↘';
             slopeClass = 'down';
             const steepness = Math.abs(a) > 5 ? 'steeply' : Math.abs(a) > 1.5 ? 'moderately' : 'gently';
             if (v0 <= 0) {
@@ -614,20 +614,20 @@ function generateMotionNarrative() {
         }
 
         // ── Displacement plain-language ──────────────────────────────────
-        const dispDir  = d > 0.001 ? 'forward (positive direction)'
-                       : d < -0.001 ? 'backward (negative direction)'
-                       : 'no net displacement (returned to same position)';
+        const dispDir = d > 0.001 ? 'forward (positive direction)'
+            : d < -0.001 ? 'backward (negative direction)'
+                : 'no net displacement (returned to same position)';
         const dispDesc = `Net displacement: <strong>${fmt(d)} m</strong> ${dispDir}.`;
 
         segments.push({ i, t0, t1, slopeIcon, slopeClass, shapeDesc, dispDesc });
     }
 
     // ── Overall summary sentence ─────────────────────────────────────────
-    const crossings    = segments.filter(s => s.slopeClass === 'cross').length;
-    const flatSegs     = segments.filter(s => s.slopeClass === 'flat').length;
-    const totalDisp    = getTotalDisplacement();
-    const totalDist    = getTotalDistance();
-    const netDir       = totalDisp > 0.001 ? 'forward' : totalDisp < -0.001 ? 'backward' : 'back to its start';
+    const crossings = segments.filter(s => s.slopeClass === 'cross').length;
+    const flatSegs = segments.filter(s => s.slopeClass === 'flat').length;
+    const totalDisp = getTotalDisplacement();
+    const totalDist = getTotalDistance();
+    const netDir = totalDisp > 0.001 ? 'forward' : totalDisp < -0.001 ? 'backward' : 'back to its start';
 
     let summary = `Over ${fmt(times[SEG_COUNT])} seconds, the object travels a total distance of 
         <strong>${fmt(totalDist)} m</strong> and ends up 
@@ -765,14 +765,15 @@ function updateAll(changedId) {
    11. Slider Wiring
    ═══════════════════════════════════════════════════════════════════════════ */
 
+// Order matches DOM tab order: start → [seg1: duration, end-velocity] → [seg2: …] → [seg3: …]
 const SLIDER_CONFIG = [
-    { id: 'v0', type: 'velocity', index: 0 },
-    { id: 'v1', type: 'velocity', index: 1 },
-    { id: 'v2', type: 'velocity', index: 2 },
-    { id: 'v3', type: 'velocity', index: 3 },
-    { id: 'dt1', type: 'duration', index: 0 },
-    { id: 'dt2', type: 'duration', index: 1 },
-    { id: 'dt3', type: 'duration', index: 2 },
+    { id: 'v0',  type: 'velocity', index: 0 },   // Starting condition
+    { id: 'dt1', type: 'duration', index: 0 },   // Segment 1 — how long
+    { id: 'v1',  type: 'velocity', index: 1 },   // Segment 1 — end velocity
+    { id: 'dt2', type: 'duration', index: 1 },   // Segment 2 — how long
+    { id: 'v2',  type: 'velocity', index: 2 },   // Segment 2 — end velocity
+    { id: 'dt3', type: 'duration', index: 2 },   // Segment 3 — how long
+    { id: 'v3',  type: 'velocity', index: 3 },   // Segment 3 — final velocity
 ];
 
 function syncOutputFromState(cfg) {
